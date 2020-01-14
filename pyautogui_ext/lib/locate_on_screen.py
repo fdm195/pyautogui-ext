@@ -29,7 +29,7 @@ def _temp_file(temp_dir, prefix='', suffix=''):
 
 
 def _pil_to_cv2_image(pil_img):
-    return cv2.cvtColor(np.array(pil_img), cv2.COLOR_BGR2GRAY)  # 从一种颜色空间转换为另一种颜色空间
+    return cv2.cvtColor(np.array(pil_img), cv2.COLOR_BGR2GRAY)  # Converts an image from one color space to another
 
 
 def _create_default_flann_matcher():
@@ -52,10 +52,10 @@ def feature_match(img1, img2, detector=None, matcher=None, ratio_test=0.75, min_
     if matcher is None:
         matcher = _create_default_bf_matcher()
 
-    kp1, des1 = detector.detectAndCompute(img1, None)  # 检测图像的关键点及其描述信息
-    kp2, des2 = detector.detectAndCompute(img2, None)  # 检测图像的关键点及其描述信息
+    kp1, des1 = detector.detectAndCompute(img1, None)  # Detects keypoints and computes the descriptors
+    kp2, des2 = detector.detectAndCompute(img2, None)  # Detects keypoints and computes the descriptors
 
-    matches = matcher.knnMatch(des1.astype(np.float32), des2.astype(np.float32), k=2)  # 返回k个最佳匹配
+    matches = matcher.knnMatch(des1.astype(np.float32), des2.astype(np.float32), k=2)  # Finds the k best matches for each descriptor from a query set
 
     # select good matches via ratio test as per Lowe's paper
     good_matches = []
@@ -75,12 +75,12 @@ def feature_match(img1, img2, detector=None, matcher=None, ratio_test=0.75, min_
     src_pts = np.float32([kp1[m[0].queryIdx].pt for m in good_matches]).reshape(-1, 1, 2)
     dst_pts = np.float32([kp2[m[0].trainIdx].pt for m in good_matches]).reshape(-1, 1, 2)
 
-    trans, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)  # 查找两个平面之间的透视转换。
+    trans, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)  # Finds a perspective transformation between two planes
     matches_mask = mask.ravel().tolist()
 
     h, w = img1.shape
     pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
-    dst = cv2.perspectiveTransform(pts, trans)  # 执行向量的透视矩阵转换。
+    dst = cv2.perspectiveTransform(pts, trans)  # Performs the perspective matrix transformation of vectors.
     x1, y1 = dst[0][0]
     x2, y2 = dst[2][0]
     x = (x1 + x2) / 4

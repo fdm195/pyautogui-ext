@@ -83,8 +83,8 @@ def feature_match(img1, img2, left_top, detector=None, matcher=None, ratio_test=
     dst = cv2.perspectiveTransform(pts, trans)  # Performs the perspective matrix transformation of vectors.
     x1, y1 = dst[0][0]
     x2, y2 = dst[2][0]
-    x = (x1 + x2) / 4
-    y = (y1 + y2) / 4
+    x = left_top[0] / 2 + (x1 + x2) / 4
+    y = left_top[1] / 2 + (y1 + y2) / 4
     geo = [left_top[0] + x1, left_top[1] + y1, x2 - x1, y2 - y1]
     return x, y, geo
 

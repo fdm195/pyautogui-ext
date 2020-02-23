@@ -43,7 +43,7 @@ def _create_default_bf_matcher():
     return cv2.BFMatcher()
 
 
-def feature_match(img1, img2, left_top, detector=None, matcher=None, ratio_test=0.75, min_matches=4, debug=True,
+def feature_match(img1, img2, left_top, min_matches=4, detector=None, matcher=None, ratio_test=0.75, debug=True,
                   temp_dir='./tmp'):
     if detector is None:
         detector = cv2.xfeatures2d.SURF_create(800)
@@ -105,6 +105,15 @@ def feature_match(img1, img2, left_top, detector=None, matcher=None, ratio_test=
 class AutoGui:
     def __init__(self, debug=False):
         self._debug = debug
+
+    def images_match(self, image1: str, image2: str, min_matches: int):
+        try:
+            img1 = cv2.cvtColor(cv2.imread(image1), cv2.COLOR_BGR2GRAY)
+            img2 = cv2.cvtColor(cv2.imread(image2), cv2.COLOR_BGR2GRAY)
+            feature_match(img1, img2, [0, 0], min_matches)
+            return True
+        except:
+            return False
 
     def locate_on_screen(self, *refs):
         x, y, geo = None, None, None

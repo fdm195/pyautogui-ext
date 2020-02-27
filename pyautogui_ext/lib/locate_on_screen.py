@@ -115,11 +115,11 @@ class AutoGui:
         except:
             return False
 
-    def locate_on_screen(self, *refs):
+    def locate_on_screen(self, images, min_matches):
         x, y, geo = None, None, None
-        for i in range(len(refs)):
+        for i in range(len(images)):
             # load reference image
-            ref_img = cv2.cvtColor(cv2.imread(refs[i]), cv2.COLOR_BGR2GRAY)
+            ref_img = cv2.cvtColor(cv2.imread(images[i]), cv2.COLOR_BGR2GRAY)
             # take screen shot
             screenshot_filename = None
             if self._debug:
@@ -129,11 +129,11 @@ class AutoGui:
             if i == 0:
                 sensed_img = _pil_to_cv2_image(screenshot(screenshot_filename))
                 left_top = [0, 0]
-                x, y, geo = feature_match(ref_img, sensed_img, left_top)
+                x, y, geo = feature_match(ref_img, sensed_img, left_top, int(min_matches[i]))
             else:
                 sensed_img = _pil_to_cv2_image(screenshot(screenshot_filename, geo))
                 left_top = [geo[0], geo[1]]
-                x, y, geo = feature_match(ref_img, sensed_img, left_top)
+                x, y, geo = feature_match(ref_img, sensed_img, left_top, int(min_matches[i]))
         return x, y, geo
 
 

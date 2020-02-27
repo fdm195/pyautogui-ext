@@ -66,7 +66,7 @@ def feature_match(img1, img2, left_top, min_matches=4, detector=None, matcher=No
         elif 1 == len(match):  # there are chances that only 1 match point is found
             good_matches.append(match)
 
-    logger.info('{} good matches are found (ratio: {})'.format(len(good_matches), ratio_test))
+    logger.info('{} good matches are found (ratio: {}, min_matches: {})'.format(len(good_matches), ratio_test, min_matches))
     assert len(good_matches) >= min_matches, \
         'good match points is less than min_matches: {}'.format(min_matches)
 
@@ -115,11 +115,12 @@ class AutoGui:
         except:
             return False
 
-    def locate_on_screen(self, images, min_matches):
+    def locate_on_screen(self, images: str, min_matches):
+        images_arr = images.split(",")
         x, y, geo = None, None, None
-        for i in range(len(images)):
+        for i in range(len(images_arr)):
             # load reference image
-            ref_img = cv2.cvtColor(cv2.imread(images[i]), cv2.COLOR_BGR2GRAY)
+            ref_img = cv2.cvtColor(cv2.imread(images_arr[i]), cv2.COLOR_BGR2GRAY)
             # take screen shot
             screenshot_filename = None
             if self._debug:

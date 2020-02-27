@@ -117,7 +117,7 @@ class AutoGui:
 
     def locate_on_screen(self, images: str, min_matches):
         images_arr = images.split(",")
-        x, y, geo = None, None, None
+        x, y, geo, left_top = None, None, None, None
         for i in range(len(images_arr)):
             # load reference image
             ref_img = cv2.cvtColor(cv2.imread(images_arr[i]), cv2.COLOR_BGR2GRAY)
@@ -127,14 +127,14 @@ class AutoGui:
                 screenshot_filename = 'screenshot_%s.png' % (
                     datetime.datetime.now().strftime('%Y-%m%d_%H-%M-%S-%f'))
                 logger.info('screenshot file {}'.format(screenshot_filename))
+            min_match = min_matches if isinstance(min_matches, int) else int(min_matches[i])
             if i == 0:
                 sensed_img = _pil_to_cv2_image(screenshot(screenshot_filename))
                 left_top = [0, 0]
-                x, y, geo = feature_match(ref_img, sensed_img, left_top, int(min_matches[i]))
             else:
                 sensed_img = _pil_to_cv2_image(screenshot(screenshot_filename, geo))
                 left_top = [geo[0], geo[1]]
-                x, y, geo = feature_match(ref_img, sensed_img, left_top, int(min_matches[i]))
+            x, y, geo = feature_match(ref_img, sensed_img, left_top, min_match)
         return x, y, geo
 
 

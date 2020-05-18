@@ -5,6 +5,9 @@ import cv2
 import fire
 import numpy as np
 from pyscreeze import screenshot
+from PIL import Image
+import tempfile
+import sys
 
 # this is a trick to cheat PyCharm to support autocomplete
 try:
@@ -43,6 +46,13 @@ def _create_default_bf_matcher():
     return cv2.BFMatcher()
 
 
+def resize_image_to_double_size(sourceImage: str, targetImage: str):
+    pic = Image.open(sourceImage)
+    width, height = pic.size
+    pic = pic.resize((width, height))
+    pic.save(targetImage)
+
+
 def feature_match(img1, img2, left_top, min_matches=4, detector=None, matcher=None, ratio_test=0.75, debug=True,
                   temp_dir='./tmp'):
     if detector is None:
@@ -66,7 +76,8 @@ def feature_match(img1, img2, left_top, min_matches=4, detector=None, matcher=No
         elif 1 == len(match):  # there are chances that only 1 match point is found
             good_matches.append(match)
 
-    logger.info('{} good matches are found (ratio: {}, min_matches: {})'.format(len(good_matches), ratio_test, min_matches))
+    logger.info(
+        '{} good matches are found (ratio: {}, min_matches: {})'.format(len(good_matches), ratio_test, min_matches))
     assert len(good_matches) >= min_matches, \
         'good match points is less than min_matches: {}'.format(min_matches)
 
@@ -120,7 +131,13 @@ class AutoGui:
         x, y, geo, left_top = None, None, None, None
         for i in range(len(images_arr)):
             # load reference image
-            ref_img = cv2.cvtColor(cv2.imread(images_arr[i]), cv2.COLOR_BGR2GRAY)
+            if sys.platform == "win32":
+                resized_image = tempfile.gettempdir() + '/1.png'
+                resize_image_to_double_size(images_arr[i], resized_image)
+                ref_img = cv2.cvtColor(cv2.imread(resized_image), cv2.COLOR_BGR2GRAY)
+            if sys.platform == "darwin":
+                ref_img = cv2.cvtColor(cv2.imread(images_arr[i]), cv2.COLOR_BGR2GRAY)
+
             # take screen shot
             screenshot_filename = None
             if self._debug:
@@ -128,11 +145,20 @@ class AutoGui:
                     datetime.datetime.now().strftime('%Y-%m%d_%H-%M-%S-%f'))
                 logger.info('screenshot file {}'.format(screenshot_filename))
             min_match = min_matches if isinstance(min_matches, int) else int(min_matches[i])
+
             if i == 0:
-                sensed_img = _pil_to_cv2_image(screenshot(screenshot_filename))
+                screenshot_image = screenshot(screenshot_filename)
+                if sys.platform == "win32":
+                    width, height = screenshot_image.size
+                    screenshot_image.resize((width * 2, height * 2))
+                sensed_img = _pil_to_cv2_image(screenshot_image)
                 left_top = [0, 0]
             else:
-                sensed_img = _pil_to_cv2_image(screenshot(screenshot_filename, geo))
+                screenshot_image = screenshot(screenshot_filename, geo)
+                if sys.platform == "win32":
+                    width, height = screenshot_image.size
+                    screenshot_image.resize((width * 2, height * 2))
+                sensed_img = _pil_to_cv2_image(screenshot_image)
                 left_top = [geo[0], geo[1]]
             x, y, geo = feature_match(ref_img, sensed_img, left_top, min_match)
         return x, y, geo

@@ -49,7 +49,7 @@ def _create_default_bf_matcher():
 def resize_image_to_double_size(sourceImage: str, targetImage: str):
     pic = Image.open(sourceImage)
     width, height = pic.size
-    pic = pic.resize((width, height))
+    pic = pic.resize((width * 2, height * 2))
     pic.save(targetImage)
 
 

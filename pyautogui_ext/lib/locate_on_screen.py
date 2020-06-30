@@ -46,7 +46,7 @@ def _create_default_bf_matcher():
 def feature_match(img1, img2, left_top, min_matches=4, detector=None, matcher=None, ratio_test=0.75, debug=True,
                   temp_dir='./tmp'):
     if detector is None:
-        detector = cv2.xfeatures2d.SURF_create(200)
+        detector = cv2.xfeatures2d.SURF_create(400)
     if matcher is None:
         matcher = _create_default_bf_matcher()
 
